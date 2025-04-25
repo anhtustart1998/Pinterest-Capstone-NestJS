@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model boards {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  name        String    @db.VarChar(255)
+  description String?
+  isPrivate   Boolean?  @default(false)
+  isActive    Boolean?  @default(true)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime  @default(now()) @db.Timestamp(6)
+  isDeleted   Boolean   @default(false)
+  deletedBy   Int       @default(0)
+  deletedAt   DateTime? @db.Timestamp(6)
+  users       users     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  saves       saves[]
+}
+
+model comments {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  postId    Int
+  content   String
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @default(now()) @db.Timestamp(6)
+  isDeleted Boolean   @default(false)
+  deletedBy Int       @default(0)
+  deletedAt DateTime? @db.Timestamp(6)
+  posts     posts     @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model permissions {
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(255)
+  endpoint        String            @db.VarChar(255)
+  method          String            @db.VarChar(255)
+  module          String            @db.VarChar(255)
+  isActive        Boolean?          @default(true)
+  createdAt       DateTime          @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime          @default(now()) @db.Timestamp(6)
+  isDeleted       Boolean?          @default(false)
+  deletedBy       Int               @default(0)
+  deletedAt       DateTime?         @db.Timestamp(6)
+  role_permission role_permission[]
+}
+
+model posts {
+  id          Int        @id @default(autoincrement())
+  userId      Int
+  imageUrl    String     @db.VarChar(255)
+  title       String     @db.VarChar(255)
+  description String?
+  isActive    Boolean?   @default(true)
+  createdAt   DateTime   @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime   @default(now()) @db.Timestamp(6)
+  isDeleted   Boolean    @default(false)
+  deletedBy   Int        @default(0)
+  deletedAt   DateTime?  @db.Timestamp(6)
+  comments    comments[]
+  users       users      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  saves       saves[]
+}
+
+model role_permission {
+  id           Int         @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  isActive     Boolean?    @default(true)
+  createdAt    DateTime    @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime    @default(now()) @db.Timestamp(6)
+  isDeleted    Boolean     @default(false)
+  deletedBy    Int         @default(0)
+  deletedAt    DateTime?   @db.Timestamp(6)
+  permissions  permissions @relation(fields: [permissionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  roles        roles       @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("role-permission")
+}
+
+model roles {
+  id              Int               @id @default(autoincrement())
+  name            String?           @db.VarChar(255)
+  description     String?           @db.VarChar(255)
+  isActive        Boolean?          @default(true)
+  createdAt       DateTime          @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime          @default(now()) @db.Timestamp(6)
+  isDeleted       Boolean           @default(false)
+  deletedBy       Int               @default(0)
+  deletedAt       DateTime?         @db.Timestamp(6)
+  role_permission role_permission[]
+  users           users[]
+}
+
+model saves {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  postId    Int
+  boardId   Int?
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @default(now()) @db.Timestamp(6)
+  isDeleted Boolean   @default(false)
+  deletedBy Int       @default(0)
+  deletedAt DateTime? @db.Timestamp(6)
+  boards    boards?   @relation(fields: [boardId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  posts     posts     @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique @db.VarChar(255)
+  fullname   String     @db.VarChar(255)
+  avatar     String?    @db.VarChar(255)
+  password   String?    @db.VarChar(255)
+  facebookId String?    @unique @db.VarChar(255)
+  googleID   String?    @unique @db.VarChar(255)
+  roleId     Int
+  isActive   Boolean?   @default(true)
+  createdAt  DateTime   @default(now()) @db.Timestamp(6)
+  updatedAt  DateTime   @default(now()) @db.Timestamp(6)
+  isDeleted  Boolean    @default(false)
+  deletedBy  Int        @default(0)
+  deletedAt  DateTime?  @db.Timestamp(6)
+  boards     boards[]
+  comments   comments[]
+  posts      posts[]
+  saves      saves[]
+  roles      roles      @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

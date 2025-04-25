@@ -1,0 +1,160 @@
+CREATE OR REPLACE FUNCTION update_modified_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW."updatedAt" = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TABLE Roles (
+  "id" SERIAL PRIMARY KEY,
+  "name" VARCHAR(255),
+  "description" VARCHAR(255),
+  "isActive" BOOLEAN DEFAULT TRUE,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE,
+  "deletedBy" INTEGER NOT NULL DEFAULT 0,
+  "deletedAt" TIMESTAMP
+);
+
+CREATE TABLE permissions (
+  "id" SERIAL PRIMARY KEY,
+  "name" VARCHAR(255) NOT NULL,
+  "endpoint" VARCHAR(255) NOT NULL,
+  "method" VARCHAR(255) NOT NULL,
+  "module" VARCHAR(255) NOT NULL,
+  "isActive" BOOLEAN DEFAULT TRUE,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "isDeleted" BOOLEAN DEFAULT FALSE,
+  "deletedBy" INTEGER NOT NULL DEFAULT 0,
+  "deletedAt" TIMESTAMP
+);
+
+CREATE TRIGGER update_permissions_modtime
+BEFORE UPDATE ON "permissions"
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
+CREATE TABLE "role-permission" (
+  "id" SERIAL PRIMARY KEY,
+  "roleId" INTEGER NOT NULL references "roles" ("id"),
+  "permissionId" INTEGER NOT NULL references "permissions" ("id"),
+  "isActive" BOOLEAN DEFAULT TRUE,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE,
+  "deletedBy" INTEGER NOT NULL DEFAULT 0,
+  "deletedAt" TIMESTAMP
+);
+
+CREATE TRIGGER update_rolepermission_modtime
+BEFORE UPDATE ON "role-permission"
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
+
+CREATE TABLE "users" (
+  "id" SERIAL PRIMARY KEY,
+  "email" VARCHAR(255) UNIQUE NOT NULL,
+  "fullname" VARCHAR(255) NOT NULL,
+  "avatar" VARCHAR(255) DEFAULT NULL,
+  "password" VARCHAR(255) DEFAULT NULL,
+  "facebookId" VARCHAR(255) UNIQUE DEFAULT NULL,
+  "googleID" VARCHAR(255) UNIQUE DEFAULT NULL,
+  "roleId" INTEGER NOT NULL REFERENCES "roles" ("id"),
+  "isActive" BOOLEAN DEFAULT TRUE,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE,
+  "deletedBy" INTEGER NOT NULL DEFAULT 0,
+  "deletedAt" TIMESTAMP
+);
+
+CREATE TRIGGER update_users_modtime
+BEFORE UPDATE ON "users"
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
+
+CREATE TABLE "posts" (
+  "id" SERIAL PRIMARY KEY,
+  "userId" INTEGER NOT NULL REFERENCES "users" ("id"),
+  "imageUrl" VARCHAR(255) NOT NULL,
+  "title" VARCHAR(255) NOT NULL,
+  "description" TEXT,
+  "isActive" BOOLEAN DEFAULT TRUE,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE,
+  "deletedBy" INTEGER NOT NULL DEFAULT 0,
+  "deletedAt" TIMESTAMP
+);
+
+CREATE TRIGGER update_posts_modtime
+BEFORE UPDATE ON "posts"
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
+
+
+CREATE TABLE "boards" (
+  "id" SERIAL PRIMARY KEY,
+  "userId" INTEGER NOT NULL REFERENCES "users" ("id"),
+  "name" VARCHAR(255) NOT NULL,
+  "description" TEXT,
+  "isPrivate" BOOLEAN DEFAULT FALSE,
+  "isActive" BOOLEAN DEFAULT TRUE,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE,
+  "deletedBy" INTEGER NOT NULL DEFAULT 0,
+  "deletedAt" TIMESTAMP
+);
+
+CREATE TRIGGER update_boards_modtime
+BEFORE UPDATE ON "boards"
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
+
+
+
+CREATE TABLE "saves" (
+  "id" SERIAL PRIMARY KEY,
+  "userId" INTEGER NOT NULL REFERENCES "users" ("id"),
+  "postId" INTEGER NOT NULL REFERENCES "posts" ("id"),
+  "boardId" INTEGER REFERENCES "boards" ("id"),
+  "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE,
+  "deletedBy" INTEGER NOT NULL DEFAULT 0,
+  "deletedAt" TIMESTAMP
+);
+
+CREATE TRIGGER update_saves_modtime
+BEFORE UPDATE ON "saves"
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
+
+CREATE TABLE "comments" (
+  "id" SERIAL PRIMARY KEY,
+  "userId" INTEGER NOT NULL REFERENCES "users" ("id"),
+  "postId" INTEGER NOT NULL REFERENCES "posts" ("id"),
+  "content" TEXT NOT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE,
+  "deletedBy" INTEGER NOT NULL DEFAULT 0,
+  "deletedAt" TIMESTAMP
+);
+
+-- Function to automatically update the updatedAt when each row is updated.
+CREATE TRIGGER update_comments_modtime
+BEFORE UPDATE ON "comments"
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
+
