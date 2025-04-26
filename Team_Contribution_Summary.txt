@@ -1,0 +1,18 @@
+Pinterest NestJS Project - Team Contribution Summary
+-----------------------------------------------------
+
+| Name            | Contributions                           |
+|-----------------|-----------------------------------------|
+| Lê Anh Tú       | - Authentication Module                 |
+|                 | - Cloudinary Integration                |
+|                 | - Posts Module                          |
+|-----------------|-----------------------------------------|
+| Từ Kim Hoàng    | - Boards Module                         |
+|                 | - Saves Module                          |
+|                 | - Users Module                          |
+|-----------------|-----------------------------------------|
+| Bùi Ngọc Sơn    | - Comment Module                        |
+-------------------------------------------------------------
+
+
+
