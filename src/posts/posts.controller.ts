@@ -69,8 +69,8 @@ export class PostsController {
     if (search) {
       params.where = {
         OR: [
-          { title: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
+          { title: { contains: search} },
+          { description: { contains: search} },
         ],
       };
     }

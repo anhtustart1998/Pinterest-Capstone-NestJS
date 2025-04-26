@@ -9,6 +9,7 @@ import { PostsModule } from './posts/posts.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { BoardsModule } from './boards/boards.module';
 import { SavesModule } from './saves/saves.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SavesModule } from './saves/saves.module';
     CloudinaryModule,
     BoardsModule,
     SavesModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

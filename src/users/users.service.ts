@@ -1,13 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { users, Prisma } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { users, Prisma} from '@prisma/client';
 
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async findOne(id: number): Promise<users> {
+
     const user = await this.prisma.users.findUnique({
       where: { id, isDeleted: false },
     });
